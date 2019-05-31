@@ -1,6 +1,6 @@
 //test url : https://ccdcapi.alipay.com/validateAndCacheCardInfo.json?cardNo=6222005865412565805&cardBinCheck=true
 //cardType:DC->储蓄卡,CC->信用卡
-(function() {
+(function () {
   var root = this;
   var cardTypeMap = {
     DC: "储蓄卡",
@@ -655,7 +655,7 @@
       reg: /^(6886592)\d{11}$/g,
       cardType: "DC"
     }, {
-      reg: /^(623019|621600|)\d{13}$/g,
+      reg: /^(623019|621600)\d{13}$/g,
       cardType: "DC"
     }]
   }, {
@@ -668,7 +668,7 @@
       reg: /^(621267|623063)\d{12}$/g,
       cardType: "DC"
     }, {
-      reg: /^(620043|)\d{12}$/g,
+      reg: /^(620043)\d{12}$/g,
       cardType: "PC"
     }]
   }, {
@@ -1529,19 +1529,19 @@
 
   function _getBankInfoByCardNoAsync(cardNo, cbf) {
     var errMsg = "";
-    _getBankInfoByCardNo(cardNo, function(err, info) {
+    _getBankInfoByCardNo(cardNo, function (err, info) {
       if (!err && info) {
         return cbf(null, info);
       } else {
         if (typeof module !== 'undefined' && module.exports) {
           var https = require('https');
-          https.get("https://ccdcapi.alipay.com/validateAndCacheCardInfo.json?_input_charset=utf-8&cardNo=" + cardNo + "&cardBinCheck=true", function(res) {
+          https.get("https://ccdcapi.alipay.com/validateAndCacheCardInfo.json?_input_charset=utf-8&cardNo=" + cardNo + "&cardBinCheck=true", function (res) {
             if (res.statusCode == 200) {
               var chunk = "";
-              res.on('data', function(d) {
+              res.on('data', function (d) {
                 chunk += d;
               });
-              res.on('end', function() {
+              res.on('end', function () {
                 try {
                   var bankInfo = JSON.parse(chunk);
                   if (bankInfo.validated) {
@@ -1565,7 +1565,7 @@
               errMsg = cardNo + ':获取alipay接口信息出错了,statusCode,' + res.statusCode;
               cbf(errMsg);
             }
-          }).on('error', function(e) {
+          }).on('error', function (e) {
             errMsg = cardNo + ':获取alipay接口信息出错了';
             cbf(errMsg);
           });
@@ -1579,7 +1579,7 @@
   function getBankBin(cardNo, cbf) {
     var errMsg = '';
     if (!isFunction(cbf)) {
-      cbf = function() {};
+      cbf = function () {};
     }
     if (isNaN(cardNo)) {
       cardNo = parseInt(cardNo);
@@ -1592,15 +1592,15 @@
       errMsg = cardNo + ':银行卡位数必须是15到19位';
       return cbf(errMsg)
     }
-    _getBankInfoByCardNoAsync(cardNo, function(err, bin) {
+    _getBankInfoByCardNoAsync(cardNo, function (err, bin) {
       cbf(err, bin);
     });
   }
 
   function promiseApi(cardNo, cbf) {
     var Promise = require('bluebird');
-    return new Promise(function(resolve, reject) {
-      getBankBin(cardNo, function(err, data) {
+    return new Promise(function (resolve, reject) {
+      getBankBin(cardNo, function (err, data) {
         if (err) {
           return reject(err)
         }
@@ -1616,13 +1616,13 @@
     }
     exports.getBankBin = promiseApi;
   } else if (typeof define === 'function' && define.amd) {
-    define('bankInfo', [], function() {
+    define('bankInfo', [], function () {
       return {
         getBankBin: getBankBin
       };
     });
   } else if (typeof define === 'function' && define.cmd) {
-    define(function() {
+    define(function () {
       return {
         getBankBin: getBankBin
       };
